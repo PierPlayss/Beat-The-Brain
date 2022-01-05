@@ -1,7 +1,7 @@
 # Beat-The-Brain
 Its a game base on the UK TV show "Beat the game", made with SDL2 and C++.
 
-For now includes 5 categories with 1 game each.
+For now includes 6 categories with 1 game each.
 
 # Pictures
 
