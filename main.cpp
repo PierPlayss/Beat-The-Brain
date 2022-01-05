@@ -21,6 +21,7 @@
 #include "Memory.h"
 #include "logicGame.h"
 #include "discos.h"
+#include "language.h"
 
 
 using namespace std;
@@ -81,19 +82,18 @@ int main(int argc, char* argv[]) {
 	SDL_Event event;
 	SDL_Event mouseEvent{ SDL_MOUSEMOTION };
 
-	
-
-
-
-
 	bool gameRunning = true;
 	int contador = 0;
 	bool played[6] = { 0,0,0,0,0,0 };
 	bool start = false;
 	bool stop = false;
+	int ended = 0;
+	
 	srand(time(NULL));
 	while (gameRunning)
 	{	
+		int aux = 0;
+		bool rendered = true;
 		window.RenderWindow::clear();
 		// Get our controls and events
 		while (SDL_PollEvent(&event))
@@ -143,50 +143,71 @@ int main(int argc, char* argv[]) {
 			}*/
 			if (stop == false) {
 				//contador++;
-				contador = rand() % 5;
+			
+				contador = rand() % 6;
+				
 				//cout << contador << endl;
 				Sleep(400);
 			}
-
+				
+		}	
+		if (contador == 0 and played[0] == true) {
+			contador++;
+		}
+		if (contador == 1 and played[1] == true) {
+			contador++;
+		}
+		if (contador == 2 and played[2] == true) {
+			contador++;
+		}
+		if (contador == 3 and played[3] == true) {
+			contador++;
+		}
+		if (contador == 4 and played[4] == true) {
+			contador++;
+		}
+		if (contador == 5 and played[5] == true) {
+			while (rendered) {
+				if (played[aux] == false) {
+					contador = aux;
+					rendered = false;
+				}
+				else aux++;
+			}
+		}
+		for (int i = 0; i < 6; i++) {
+			if (played[i] == true) {
+				ended++;
+			}
+			if (ended == 5) {
+				gameRunning = false;
+			}
 		}
 
-		if (contador == 0) {
-			if (played[contador] == false) {
+		//cout << contador << endl;
+	
+			if (contador == 0) {
 				window.render(LogicE, 1);
 			}
-			else contador++;
-			
-		}
-		if (contador == 1) {
-			if (played[contador] == false) {
+			if (contador == 1) {
 				window.render(MemoryE, 1);
 			}
-			else contador++;
-		}
-		if (contador == 2) {
-			if (played[contador] == false) {
+			if (contador == 2) {
 				window.render(OrientationE, 1);
 			}
-			else contador++;
-		}
-		if (contador == 3) {
-			if (played[contador] == false) {
+			if (contador == 3) {
 				window.render(ObservationE, 1);
 			}
-			else contador++;
-		}
-		///*if (contador == 4) {
-		//	window.render(LanguageE, 1);
-		//}
-		if (contador == 4) {
-			if (played[contador] == false) {
-				window.render(MTE, 1);
+			if (contador == 4) {
+				window.render(LanguageE, 1);
 			}
-			else contador++;
-			
-			//contador = -1;
-		}
+			if (contador == 5) {
+				window.render(MTE, 1);
+				//contador = -1;
+			}
+		
 	
+		//cout << contador << endl;
 		
 		if (stop == true) {
 			Sleep(600);
@@ -207,30 +228,32 @@ int main(int argc, char* argv[]) {
 				brickGame(brickTexture, brickAfterTexture, BGTexture, window);
 				played[contador] = true;
 			}
+			if (contador == 4) {
+				languageGame(window);
+				played[4] = true;
+			}
 			if (contador == -1) {
 				discosGame(BGTexture, window);
-				played[contador] = true;
+				played[5] = true;
 			}
 			
 			stop = false;
 			start = false;
 			contador == 0;
-			window.clear();
+			//window.clear();
 		}
 		
-		if (contador >= 4) {
+		
+		if (contador >= 5) {
 			//window.render(MTE, 1);
 			contador = -1;
 		}
-
-		
 
 
 
 		window.display();
 		
-		
-	
+		ended = 0;
 	
 	}
 
