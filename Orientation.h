@@ -16,4 +16,4 @@
 #include "SDL2SoundEffects.h"
 
 
-int relojesGame(SDL_Texture* background, RenderWindow gamesWindow);
+int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* background, RenderWindow gamesWindow);

@@ -17,11 +17,11 @@
 #include "SDL2SoundEffects.h"
 
 #include "Memory.h"
-
+#include "animation.h"
 
 using namespace std;
 
-int ColorGame(SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
+int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
 	SDL_Texture* pinkTexture = window.loadTexture("res/gfx/Memory/pink.png");
 	SDL_Texture* redTexture = window.loadTexture("res/gfx/Memory/red.png");
 	SDL_Texture* whiteTexture = window.loadTexture("res/gfx/Memory/white.png");
@@ -32,11 +32,22 @@ int ColorGame(SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
 	SDL_Texture* purpleTexture = window.loadTexture("res/gfx/Memory/purple.png");
 	SDL_Texture* bordeTexture = window.loadTexture("res/gfx/bordeMemory.png");
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/MemoryTitle.png");
+	SDL_Texture* blackBGTexture = window.loadTexture("res/gfx/black.png");
 	int completo[8] = { 1,1,1,1,1,1,1,1 };
 	int clicks = -1;
 	int contador = 5;
 	srand(time(NULL));
 	SDL_Event event;
+
+	bool toggleMenu = false;
+	int intmenu = 0;
+	int mouseX, mouseY;
+
+
+	animationIn(window,
+		blackBGTexture, brainTexture, LogoTexture, BGT, titleTexture, bordeTexture, bordeTexture,
+		" ", 0, 0, 0,
+		161, 113, 16);
 
 
 	for (int i = 0; i < 3; i++) {
@@ -54,7 +65,7 @@ int ColorGame(SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
 			{
 				if (event.type == SDL_QUIT)
 				{
-					window.backgroundColor(0, 0, 0);
+					window.backgroundColor(0, 0, 0, 255);
 					window.display();
 					return 0;
 				}
@@ -63,17 +74,39 @@ int ColorGame(SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					clicks++;
 					if (clicks == 1) {
-						if (showAnswers == true) {
-							memory = false;
+						if (toggleMenu == false) {
+							if (showAnswers == true) {
+								memory = false;
+							}
+							if (stop == true) {
+								showAnswers = true;
+							}
+							else start = true;
 						}
-						if (stop == true) {
-							showAnswers = true;
-						}
-						else start = true;
 
 					}
 					else clicks = 0;
 
+				}
+				if (event.type == SDL_MOUSEMOTION) {
+
+					mouseX = event.motion.x;
+					mouseY = event.motion.y;
+					//cout << mouseX << "," << mouseY << endl;
+
+				}
+				if (event.type == SDL_KEYDOWN) {
+					if ((event.key.keysym.sym == SDLK_RETURN) &&
+						(event.key.keysym.mod & KMOD_ALT))
+					{
+						window.ToggleFullscreen();
+					}
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						if (toggleMenu == false) {
+							toggleMenu = true;
+						}
+						else toggleMenu = false;
+					}
 				}
 			}
 			window.clear();
@@ -114,12 +147,39 @@ int ColorGame(SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
 				displayColors(completo, window, pinkTexture, redTexture, whiteTexture, blueTexture, blackTexture, greenTexture, yellowTexture, purpleTexture);
 			}
 
+
+			if (toggleMenu == true) {
+				intmenu = menu(window, mouseX, mouseY, event, clicks);
+
+				if (intmenu == 1) {
+					toggleMenu = false;
+					SDL_Delay(40);
+				}
+				if (intmenu == 2) {
+					window.backgroundColor(0, 0, 0, 255);
+					window.display();
+					SDL_DestroyTexture(pinkTexture);
+					SDL_DestroyTexture(redTexture);
+					SDL_DestroyTexture(whiteTexture);
+					SDL_DestroyTexture(blueTexture);
+					SDL_DestroyTexture(blackTexture);
+					SDL_DestroyTexture(greenTexture);
+					SDL_DestroyTexture(yellowTexture);
+					SDL_DestroyTexture(purpleTexture);
+					SDL_DestroyTexture(bordeTexture);
+					SDL_DestroyTexture(titleTexture);
+					SDL_DestroyTexture(blackTexture);
+					return 1;
+
+				}
+			}
+
 			window.display();
 		}
 			
 		contador++;
 	}
-	window.backgroundColor(0, 0, 0);
+	window.backgroundColor(0, 0, 0, 255);
 	window.display();
 	SDL_DestroyTexture(pinkTexture);
 	SDL_DestroyTexture(redTexture);
@@ -131,10 +191,11 @@ int ColorGame(SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
 	SDL_DestroyTexture(purpleTexture);
 	SDL_DestroyTexture(bordeTexture);
 	SDL_DestroyTexture(titleTexture);
+	SDL_DestroyTexture(blackTexture);
 	return 0;
 }
 void renderBG(SDL_Texture* BGTexture, SDL_Texture* bordeTexture, SDL_Texture* titleTexture, RenderWindow window) {
-	window.backgroundColor(161, 113, 16);
+	window.backgroundColor(161, 113, 16, 255);
 	Entity BGEntity(0, 0, 1280, 720, BGTexture);
 	window.render(BGEntity, 1);
 	SDL_SetTextureAlphaMod(bordeTexture, 200);

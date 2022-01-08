@@ -1,4 +1,8 @@
 #pragma once
+//SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 //C++
 #include <iostream>
 #include <vector>
@@ -11,5 +15,4 @@
 #include "Entity.hpp"
 #include "SDL2SoundEffects.h"
 
-int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL_Texture* BGTexture, RenderWindow window);
-void setResultados(int &resultado, int angulo, int multiplicador);
+int CarPlates(RenderWindow window, SDL_Texture* BGTexture,SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL2SoundEffects se);

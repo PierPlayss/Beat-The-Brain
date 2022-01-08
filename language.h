@@ -15,7 +15,7 @@
 #include "Entity.hpp"
 #include "SDL2SoundEffects.h"
 
-int languageGame(RenderWindow window);
+int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWindow window);
 
 void sorteador(int array[],int cantidad);
 	

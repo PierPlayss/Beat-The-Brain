@@ -22,15 +22,18 @@
 #include "logicGame.h"
 #include "discos.h"
 #include "language.h"
+#include "carplates.h"
 
+#include "animation.h"
 
 using namespace std;
 
 RenderWindow window("Beat the brain", 1280, 720);
 //RenderWindow gamesWindow("Games Window", 1000, 500);
 
-
-
+const int FPS = 60;
+int refreshRate = 1000 / FPS;
+int frame = 0;
 
 int main(int argc, char* argv[]) {
 
@@ -45,8 +48,8 @@ int main(int argc, char* argv[]) {
 	}
 	int mouseX, mouseY;
 	int clicks = 0;
-	const int FPS = 60;
-	int framerate = 0;
+	
+	
 	//Sounds
 	SDL2SoundEffects se;
 	se.addSoundEffect("res/sound/memory/pink.mp3");//0
@@ -57,6 +60,7 @@ int main(int argc, char* argv[]) {
 	se.addSoundEffect("res/sound/memory/green.mp3");//5
 	se.addSoundEffect("res/sound/memory/yellow.mp3");//6
 	se.addSoundEffect("res/sound/memory/purple.mp3");//7
+	se.addSoundEffect("res/sound/observation/car.mp3");//8
 	//se.addSoundEffect("res/sound/strike.mp3"); //0
 
 	SDL_Texture* brickTexture =window.loadTexture("res/gfx/brick.png");
@@ -70,6 +74,8 @@ int main(int argc, char* argv[]) {
 	SDL_Texture* brainMT = window.loadTexture("res/gfx/multitasking.png");
 	SDL_Texture* BGTexture = window.loadTexture("res/gfx/background.png");
 	SDL_Texture* LogoTexture = window.loadTexture("res/gfx/logo.png");
+
+	
 	Entity LogicE(0, 50,1280, 720, brainLogic);
 	Entity MemoryE(0, 50, 1280, 720, brainMemory);
 	Entity ObservationE(0, 50, 1280, 720, brainObservation);
@@ -87,11 +93,14 @@ int main(int argc, char* argv[]) {
 	bool played[6] = { 0,0,0,0,0,0 };
 	bool start = false;
 	bool stop = false;
+	bool toggleMenu = false;
+	int intmenu = 0;
 	int ended = 0;
 	
 	srand(time(NULL));
 	while (gameRunning)
 	{	
+		
 		int aux = 0;
 		bool rendered = true;
 		window.RenderWindow::clear();
@@ -102,55 +111,80 @@ int main(int argc, char* argv[]) {
 				gameRunning = false;
 			if (event.type == SDL_MOUSEMOTION) {
 
-				mouseX = event.motion.x -25;
-				mouseY = event.motion.y -25;
+				mouseX = event.motion.x;
+				mouseY = event.motion.y;
 				//cout << mouseX << "," << mouseY << endl;
 				
 			}
 			if (event.button.button == SDL_BUTTON_LEFT) {
+				SDL_Delay(20);
 				clicks++;
 				if (clicks == 1) {
-					if (start == true) {
-						stop = true;
+					if (toggleMenu == false) {
+						if (start == true) {
+							stop = true;
+						}
+						else start = true;
 					}
-					else start = true;
 				}
 				else clicks = 0;
 			}
+			if (event.type == SDL_KEYDOWN) {
+				if ((event.key.keysym.sym == SDLK_RETURN) &&
+					(event.key.keysym.mod & KMOD_ALT))
+				{
+					window.ToggleFullscreen(); 
+				}
+				if (event.key.keysym.sym == SDLK_ESCAPE) {
+					if (toggleMenu == false) {
+						toggleMenu = true;
+					}
+					else toggleMenu = false;
+				}
+				
+			}
 		}
 		
-	
+		
+		
 		if (stop == false) {
 			
-			window.backgroundColor(0, 0, 0);
+			window.backgroundColor(0, 0, 0, 255);
 			window.render(BackgroundE, 1);
 			window.render(Logo, 1);
 			
 		}
+		if (toggleMenu == false) {
+			if (start == false) {
+				if (frame == FPS) {
+					contador++;
+					frame = 0;
+					if (contador == 6) {
+						contador = 0;
+					}
+				}
 
-		if (start == false) {
-			contador++;
-			Sleep(1000);
-			
-			window.drawText("Press click to start", 385, 650, 240, 240, 240, 255, 40);
-			
+				window.drawText("Press click to start", 385, 650, 240, 240, 240, 255, 40);
+
+			}
+			else {
+
+				if (stop == false) {
+					if (frame * 2 == FPS) {
+						contador++;
+						//contador = rand() % 6;
+						frame = 0;
+						if (contador == 6) {
+							contador = 0;
+						}
+					}
+				}
+			}
+
 
 		}
-		else {
-			/*if (stop == false) {
-				contador++;
-				Sleep(1000);
-			}*/
-			if (stop == false) {
-				//contador++;
-			
-				contador = rand() % 6;
-				
-				//cout << contador << endl;
-				Sleep(400);
-			}
-				
-		}	
+
+
 		if (contador == 0 and played[0] == true) {
 			contador++;
 		}
@@ -175,86 +209,102 @@ int main(int argc, char* argv[]) {
 				else aux++;
 			}
 		}
+		ended = 0;
 		for (int i = 0; i < 6; i++) {
 			if (played[i] == true) {
 				ended++;
 			}
-			if (ended == 5) {
+			if (ended == 6) {
 				gameRunning = false;
 			}
 		}
 
+
+		if (contador == 0) {
+			window.render(LogicE, 1);
+		}
+		if (contador == 1) {
+			window.render(MemoryE, 1);
+		}
+		if (contador == 2) {
+			window.render(OrientationE, 1);
+		}
+		if (contador == 3) {
+			window.render(ObservationE, 1);
+		}
+		if (contador == 4) {
+			window.render(LanguageE, 1);
+		}
+		if (contador == 5) {
+			window.render(MTE, 1);
+			//contador = -1;
+		}
+
+
 		//cout << contador << endl;
-	
-			if (contador == 0) {
-				window.render(LogicE, 1);
-			}
-			if (contador == 1) {
-				window.render(MemoryE, 1);
-			}
-			if (contador == 2) {
-				window.render(OrientationE, 1);
-			}
-			if (contador == 3) {
-				window.render(ObservationE, 1);
-			}
-			if (contador == 4) {
-				window.render(LanguageE, 1);
-			}
-			if (contador == 5) {
-				window.render(MTE, 1);
-				//contador = -1;
-			}
-		
-	
-		//cout << contador << endl;
-		
+
 		if (stop == true) {
 			Sleep(600);
 			//cout << contador << endl;
 			if (contador == 0) {
-				logicGame(BGTexture, window);
-				played[contador] = true;
+				if (logicGame(brainLogic, LogoTexture, BGTexture, window) == 0) {
+					played[contador] = true;
+				}
 			}
 			if (contador == 1) {
-				ColorGame(BGTexture, window,se);
-				played[contador] = true;
+				if (ColorGame(brainMemory, LogoTexture, BGTexture, window, se) == 0) {
+					played[contador] = true;
+				}
 			}
 			if (contador == 2) {
-				relojesGame(BGTexture, window);
-				played[contador] = true;
+				if (relojesGame(brainOrientation, LogoTexture, BGTexture, window) == 1) {
+					played[contador] = true;
+				}				
 			}
 			if (contador == 3) {
-				brickGame(brickTexture, brickAfterTexture, BGTexture, window);
-				played[contador] = true;
+				CarPlates(window, BGTexture, brainObservation, LogoTexture, se);
+				if (brickGame(brainObservation, LogoTexture, brickTexture, brickAfterTexture, BGTexture, window) == 0) {
+					played[contador] = true;
+				}
+			
 			}
 			if (contador == 4) {
-				languageGame(window);
-				played[4] = true;
+				if (languageGame(brainLanguage, LogoTexture, window) == 0) {
+					played[4] = true;
+				}				
 			}
-			if (contador == -1) {
-				discosGame(BGTexture, window);
-				played[5] = true;
+			if (contador == 5) {
+				if (discosGame(brainMT, LogoTexture, BGTexture, window) == 0) {
+					played[5] = true;
+				}				
 			}
-			
+
 			stop = false;
 			start = false;
 			contador == 0;
-			//window.clear();
-		}
-		
-		
-		if (contador >= 5) {
-			//window.render(MTE, 1);
-			contador = -1;
-		}
 
+		}
+		
+		
+		if (toggleMenu == true) {
+			intmenu = menu(window, mouseX, mouseY, event, clicks);
+				if (intmenu == 1) {
+					toggleMenu = false;
+				}
+				if (intmenu == 2) {
+					gameRunning = false;
+					
+				}
+		}
 
 
 		window.display();
-		
-		ended = 0;
-	
+
+		Sleep(refreshRate);
+		if (frame == FPS) {
+			frame = 0;
+		}
+		else frame++;
 	}
 
 	window.cleanUp();

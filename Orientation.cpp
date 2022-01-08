@@ -15,9 +15,10 @@
 #include "SDL2SoundEffects.h"
 
 #include "Orientation.h"
+#include "animation.h"
 using namespace std;
 
-int relojesGame(SDL_Texture* background,RenderWindow window) {
+int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* background,RenderWindow window) {
 	SDL_Texture* relojTexture = window.loadTexture("res/gfx/Orientation/watch.png");
 	SDL_Texture* bordeTexture = window.loadTexture("res/gfx/bordeReloj.png");
 	SDL_Texture* aguja2Texture = window.loadTexture("res/gfx/Orientation/arrow.png");
@@ -25,8 +26,21 @@ int relojesGame(SDL_Texture* background,RenderWindow window) {
 	SDL_Texture* aguja1Texture = window.loadTexture("res/gfx/Orientation/shortarrow.png");
 	SDL_SetTextureAlphaMod(aguja1Texture,150);
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/OrientationTitle.png");
+	SDL_Texture* blackTexture = window.loadTexture("res/gfx/black.png");
+
+	animationIn(window,
+		blackTexture, brainTexture, LogoTexture, background, titleTexture, bordeTexture, bordeTexture,
+		" ", 0, 0, 0, 
+		161, 113, 16);
 	
-	window.backgroundColor(161, 113, 16);
+
+	bool toggleMenu = false;
+	int intmenu = 0;
+	int mouseX, mouseY;
+
+
+
+	window.backgroundColor(161, 113, 16, 255);
 	Entity BGEntity(0, 0, 1280, 720, background);
 	window.render(BGEntity, 1);
 	window.display();
@@ -100,7 +114,7 @@ int relojesGame(SDL_Texture* background,RenderWindow window) {
 			{
 				if (event.type == SDL_QUIT) 
 				{
-					window.backgroundColor(0, 0, 0);
+					window.backgroundColor(0, 0, 0, 255);
 					window.display();
 					return 0;
 				}
@@ -109,26 +123,49 @@ int relojesGame(SDL_Texture* background,RenderWindow window) {
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					clicks++;
 					if (clicks == 1) {
-						if (canShow == true) {
-													
-							orientation = false;
-							
+						if (toggleMenu == false) {
+							if (canShow == true) {
+
+								orientation = false;
+
+							}
+							if (canShow == false) {
+								opacidad = 255;
+								SDL_SetTextureAlphaMod(relojTexture, opacidad);
+								SDL_SetTextureAlphaMod(aguja1Texture, opacidad);
+								SDL_SetTextureAlphaMod(aguja2Texture, opacidad);
+								canShow = true;
+							}
 						}
-						if (canShow == false) {
-							opacidad = 255;
-							SDL_SetTextureAlphaMod(relojTexture, opacidad);
-							SDL_SetTextureAlphaMod(aguja1Texture, opacidad);
-							SDL_SetTextureAlphaMod(aguja2Texture, opacidad);
-							canShow = true;
-						}
+						
 					}
 					else clicks = 0;
 
 				}
+				if (event.type == SDL_MOUSEMOTION) {
+
+					mouseX = event.motion.x;
+					mouseY = event.motion.y;
+					//cout << mouseX << "," << mouseY << endl;
+
+				}
+				if (event.type == SDL_KEYDOWN) {
+					if ((event.key.keysym.sym == SDLK_RETURN) &&
+						(event.key.keysym.mod & KMOD_ALT))
+					{
+						window.ToggleFullscreen();
+					}
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						if (toggleMenu == false) {
+							toggleMenu = true;
+						}
+						else toggleMenu = false;
+					}
+				}
 			}	
 			
 			
-			window.backgroundColor(161, 113, 16);
+			window.backgroundColor(161, 113, 16, 255);
 			Entity BGEntity(0, 0, 1280, 720, background);
 			window.render(BGEntity, 1);
 
@@ -175,16 +212,37 @@ int relojesGame(SDL_Texture* background,RenderWindow window) {
 			Entity title(0, 0, 1280, 109, titleTexture);
 			window.render(title, 1);
 
+
+			if (toggleMenu == true) {
+				intmenu = menu(window, mouseX, mouseY, event, clicks);
+
+				if (intmenu == 1) {
+					toggleMenu = false;
+					SDL_Delay(40);
+				}
+				if (intmenu == 2) {
+					window.backgroundColor(0, 0, 0, 255);
+					window.display();
+					SDL_DestroyTexture(relojTexture);
+					SDL_DestroyTexture(bordeTexture);
+					SDL_DestroyTexture(titleTexture);
+					SDL_DestroyTexture(blackTexture);
+					return 1;
+
+				}
+			}
+
 			window.display();
 
 		}
 	}
 	
 	
-	window.backgroundColor(0, 0, 0);
+	window.backgroundColor(0, 0, 0, 255);
 	window.display();
 	SDL_DestroyTexture(relojTexture);
 	SDL_DestroyTexture(bordeTexture);
 	SDL_DestroyTexture(titleTexture);
+	SDL_DestroyTexture(blackTexture);
 	return 0;
 }

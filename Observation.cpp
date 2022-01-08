@@ -15,11 +15,12 @@
 #include "SDL2SoundEffects.h"
 
 #include "Observation.h"
+#include "animation.h"
 using namespace std;
 
 
 
-int brickGame(SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* background,RenderWindow gamesWindow) {
+int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* background,RenderWindow gamesWindow) {
 	SDL_Texture* bordeTexture = gamesWindow.loadTexture("res/gfx/borde.png");
 	SDL_Texture* obTitleTexture = gamesWindow.loadTexture("res/gfx/ObservationTitle.png");
 	Entity titleE(0, 0, 1280, 107, obTitleTexture);
@@ -33,6 +34,12 @@ int brickGame(SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* b
 	string brickString;
 	int opacidad = 1;
 	
+
+
+	bool toggleMenu = false;
+	int intmenu = 0;
+	int mouseX, mouseY;
+
 	SDL_Event event;
 	
 	for (int i = 0; i < 3; i++) {
@@ -52,26 +59,50 @@ int brickGame(SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* b
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					clicks++;
 					if (clicks == 1) {
-						if (showTotal == true) {
-							observation = false;
-							gamesWindow.backgroundColor(0, 0, 0);
+						if (toggleMenu == false) {
+							if (showTotal == true) {
+								observation = false;
+								gamesWindow.backgroundColor(0, 0, 0, 255);
+							}
+							if (showBroken == true) {
+								showTotal = true;
+							}
+							else {
+								opacidad = 255;
+								SDL_SetTextureAlphaMod(brickTexture, opacidad);
+								showBroken = true;
+							}
 						}
-						if (showBroken == true) {
-							showTotal = true;
-						}
-						else {
-							opacidad = 255;
-							SDL_SetTextureAlphaMod(brickTexture, opacidad);
-							showBroken = true;
-						}
+					
 					}
 					else clicks = 0;
 
 				}
+				if (event.type == SDL_MOUSEMOTION) {
+
+					mouseX = event.motion.x;
+					mouseY = event.motion.y;
+					//cout << mouseX << "," << mouseY << endl;
+
+				}
+				if (event.type == SDL_KEYDOWN) {
+					if ((event.key.keysym.sym == SDLK_RETURN) &&
+						(event.key.keysym.mod & KMOD_ALT))
+					{
+						gamesWindow.ToggleFullscreen();
+					}
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						if (toggleMenu == false) {
+							toggleMenu = true;
+						}
+						else toggleMenu = false;
+					}
+				}
 			}
 			
-			gamesWindow.backgroundColor(31, 82, 33);
+			gamesWindow.backgroundColor(31, 82, 33, 255);
 			gamesWindow.render(titleE, 1);
+			gamesWindow.drawText("Cuenta los ladrillos que faltan", 530, 38, 240, 240, 240, 255, 21);
 			Entity BackgroundE(0, 0, 1280, 720, background);
 			gamesWindow.render(BackgroundE, 1);
 
@@ -109,11 +140,29 @@ int brickGame(SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* b
 			Entity borde(135, 110, 1030, 530, bordeTexture);
 			gamesWindow.render(borde, 1);
 
+			if (toggleMenu == true) {
+				intmenu = menu(gamesWindow, mouseX, mouseY, event, clicks);
+
+				if (intmenu == 1) {
+					toggleMenu = false;
+					SDL_Delay(40);
+				}
+				if (intmenu == 2) {
+					gamesWindow.backgroundColor(0, 0, 0, 255);
+					gamesWindow.display();
+					SDL_DestroyTexture(bordeTexture);
+					SDL_DestroyTexture(obTitleTexture);
+					return 1;
+
+				}
+			}
+
+
 			gamesWindow.display();
 		}
 	
 	}
-	gamesWindow.backgroundColor(0, 0, 0);
+	gamesWindow.backgroundColor(0, 0, 0, 255);
 	gamesWindow.display();
 	SDL_DestroyTexture(bordeTexture);
 	SDL_DestroyTexture(obTitleTexture);

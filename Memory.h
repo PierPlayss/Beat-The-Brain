@@ -15,7 +15,7 @@
 #include "Entity.hpp"
 #include "SDL2SoundEffects.h"
 
-int ColorGame(SDL_Texture* BGT,RenderWindow window, SDL2SoundEffects se);
+int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL_Texture* BGT,RenderWindow window, SDL2SoundEffects se);
 
 void renderBG(SDL_Texture* BGTexture, SDL_Texture* bordeTexture, SDL_Texture* titleTexture, RenderWindow window);
 void generadorRandom(int& anterior, int& random,int x,int y);

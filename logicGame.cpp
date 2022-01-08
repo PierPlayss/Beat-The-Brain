@@ -11,24 +11,34 @@
 #include "SDL2SoundEffects.h"
 
 #include "logicGame.h"
+#include "animation.h"
 
 using namespace std;
 
-int logicGame(SDL_Texture* BGTexture,RenderWindow window) {
-	
+int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window) {
+
 	SDL_Texture* boardTexture = window.loadTexture("res/gfx/boardlogic.png");
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/LogicTitle.png");
 	SDL_Texture* x1Texture = window.loadTexture("res/gfx/dardox1.png");
 	SDL_Texture* x2Texture = window.loadTexture("res/gfx/dardox2.png");
 	SDL_Texture* x3Texture = window.loadTexture("res/gfx/dardox3.png");
-	Entity board(135,110, 1030, 530, boardTexture);
+	SDL_Texture* blackTexture = window.loadTexture("res/gfx/black.png");
+	Entity board(135, 110, 1030, 530, boardTexture);
 	Entity dardox1(245, 125, 505, 505, x1Texture);
 	Entity dardox2(245, 125, 505, 505, x2Texture);
 	Entity dardox3(245, 125, 505, 505, x3Texture);
-	
+
 	int total = 501;
 	stringstream sc;
 	
+	bool toggleMenu = false;
+	int intmenu = 0;
+	int mouseX, mouseY;
+
+	animationIn(window,
+		blackTexture, brainTexture, LogoTexture, BGTexture, titleTexture, boardTexture, boardTexture,
+		"501", 810, 205, 50,
+		88, 18, 29);
 
 	SDL_Event event;
 	for (int i = 0; i < 3; i++) {
@@ -60,10 +70,9 @@ int logicGame(SDL_Texture* BGTexture,RenderWindow window) {
 		
 		subtotal = total - subtotal;
 
-
 		while (logic) {
 			window.clear();
-			window.backgroundColor(88, 18, 29);
+			window.backgroundColor(88, 18, 29, 255);
 			Entity BGEntity(0, 0, 1280, 720, BGTexture);
 			Entity title(0, 0, 1280, 107, titleTexture);
 			SDL_SetTextureAlphaMod(boardTexture, 240);
@@ -75,23 +84,46 @@ int logicGame(SDL_Texture* BGTexture,RenderWindow window) {
 			{
 				if (event.type == SDL_QUIT)
 				{
-					window.backgroundColor(0, 0, 0);
+					window.backgroundColor(0, 0, 0, 255);
 					window.display();
 					return 0;
 				}
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					clicks++;
 					if (clicks == 1) {
-						if (showResults == true) {
-							logic = false;
+						if (toggleMenu == false) {
+							if (showResults == true) {
+								logic = false;
+							}
+							if (start == true) {
+								showResults = true;
+							}
+							start = true;
 						}
-						if (start == true) {
-							showResults = true;
-						}
-						start = true;
 						
 					}
 					else clicks = 0;
+
+				}
+				if (event.type == SDL_MOUSEMOTION) {
+
+					mouseX = event.motion.x;
+					mouseY = event.motion.y;
+					//cout << mouseX << "," << mouseY << endl;
+
+				}
+				if (event.type == SDL_KEYDOWN) {
+					if ((event.key.keysym.sym == SDLK_RETURN) &&
+						(event.key.keysym.mod & KMOD_ALT))
+					{
+						window.ToggleFullscreen();
+					}
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						if (toggleMenu == false) {
+							toggleMenu = true;
+						}
+						else toggleMenu = false;
+					}
 
 				}
 			}
@@ -123,13 +155,34 @@ int logicGame(SDL_Texture* BGTexture,RenderWindow window) {
 				window.drawText(scoresS.c_str(), 800, 485, 241, 212, 20, 255, 50);
 			}
 
+			if (toggleMenu == true) {
+				intmenu = menu(window, mouseX, mouseY, event, clicks);
+
+				if (intmenu == 1) {
+					toggleMenu = false;
+					SDL_Delay(40);
+				}
+				if (intmenu == 2) {
+					window.backgroundColor(0, 0, 0, 255);
+					window.display();
+					SDL_DestroyTexture(boardTexture);
+					SDL_DestroyTexture(blackTexture);
+					SDL_DestroyTexture(x1Texture);
+					SDL_DestroyTexture(x2Texture);
+					SDL_DestroyTexture(x3Texture);
+					return 1;
+
+				}
+			}
+
 			window.display();
 		}
 		total = subtotal;
 	}
-	window.backgroundColor(0, 0, 0);
+	window.backgroundColor(0, 0, 0, 255);
 	window.display();
 	SDL_DestroyTexture(boardTexture);
+	SDL_DestroyTexture(blackTexture);
 	SDL_DestroyTexture(x1Texture);
 	SDL_DestroyTexture(x2Texture);
 	SDL_DestroyTexture(x3Texture);

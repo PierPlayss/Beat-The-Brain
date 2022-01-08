@@ -17,11 +17,12 @@
 #include "SDL2SoundEffects.h"
 
 #include "language.h"
+#include "animation.h"
 
 
 using namespace std;
 
-int languageGame(RenderWindow window) {
+int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWindow window) {
 	
 	SDL_Texture* paperTexture[4] = {
 		window.loadTexture("res/gfx/language/paper1.png"),
@@ -31,6 +32,8 @@ int languageGame(RenderWindow window) {
 	SDL_Texture* bordeTexture = window.loadTexture("res/gfx/bordeLanguage.png");
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/titleLanguage.png");
 	SDL_Texture* BGTexture = window.loadTexture("res/gfx/background.png");
+	SDL_Texture* timerTexture = window.loadTexture("res/gfx/time.png");
+	SDL_Texture* blackTexture = window.loadTexture("res/gfx/black.png");
 	Entity borde(135,110, 1035, 535, bordeTexture);
 	Entity title(0, 0, 1280, 107, titleTexture);
 	Entity BGEntity(0, 0, 1280, 720, BGTexture);
@@ -46,19 +49,31 @@ int languageGame(RenderWindow window) {
 	}Pos[4],posfinal[4];
 
 	srand(time(NULL));
-	
+
+	clock_t time;
+	time = clock();
 	int clicks = -1;
 	int array[4] = { 0,1,2,3 };
 	int array2[4] = { 0,1,2,3 };
 	string s[100];
 	string delimiter = ">=";
+	string respuesta;
 
 	int usado[3] = { -1,-1,-1 };
 	int random;
+	
+
+	animationIn(window,
+		blackTexture, brainTexture, LogoTexture, BGTexture, titleTexture, bordeTexture, bordeTexture,
+		"Ordena los recortes para formar palabras", 490, 38, 21,
+		121, 46, 146);
 
 	//std::cout << s << std::endl;
 
 	for (int i = 0; i < 3; i++) {
+		int restador = 0;
+		int opacidad = 0;
+		int opacidadstart = 0;
 		int lineas;
 		string aux;
 		stringstream translate;
@@ -128,15 +143,20 @@ int languageGame(RenderWindow window) {
 			posfinal[2].y = 225;
 		
 		}
+
+		bool toggleMenu = false;
+		int intmenu = 0;
+		int mouseX, mouseY;
 		
 
 		SDL_Event event;
 		bool language = true;
 		bool showResult = false;
+		
 		while (language) {
 
 			window.clear();
-			window.backgroundColor(121, 46,146);
+			window.backgroundColor(121, 46, 146, 255);
 			
 			window.render(BGEntity, 1);
 			window.render(borde,1);
@@ -152,12 +172,37 @@ int languageGame(RenderWindow window) {
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					clicks++;
 					if (clicks == 1) {
-						if (showResult == true) {
-							language = false;
+						if (toggleMenu == false) {
+							if (showResult == true) {
+								language = false;
+							}
+							showResult = true;
+							opacidadstart = 255;
 						}
-						showResult = true;
+					
 					}
 					else clicks = 0;
+
+				}
+				if (event.type == SDL_MOUSEMOTION) {
+
+					mouseX = event.motion.x;
+					mouseY = event.motion.y;
+					//cout << mouseX << "," << mouseY << endl;
+
+				}
+				if (event.type == SDL_KEYDOWN) {
+					if ((event.key.keysym.sym == SDLK_RETURN) &&
+						(event.key.keysym.mod & KMOD_ALT))
+					{
+						window.ToggleFullscreen();
+					}
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						if (toggleMenu == false) {
+							toggleMenu = true;
+						}
+						else toggleMenu = false;
+					}
 
 				}
 			}
@@ -167,6 +212,9 @@ int languageGame(RenderWindow window) {
 			
 
 			if (showResult == true) {
+				for (int i = 0; i < 4; i++) {
+					SDL_SetTextureAlphaMod(paperTexture[i], opacidadstart);
+				}
 				for (int i = 0; i < contador; i++) {
 					if (Pos[i].x < posfinal[array[i] - 1].x) {
 						Pos[i].x++;
@@ -188,20 +236,75 @@ int languageGame(RenderWindow window) {
 
 					Entity paper(Pos[i].x, Pos[i].y, 240, 220, paperTexture[array[i] - 1]);
 					window.render(paper, 1);
-					window.textPeriodico(token[array[i] - 1].c_str(), fontPeriodico[i], Pos[i].x + 40, Pos[i].y + 50, 0, 0, 0, 255, 90);
+					window.textCustom(token[array[i] - 1].c_str(), fontPeriodico[i], Pos[i].x + 40, Pos[i].y + 50, 0, 0, 0, 255, 90,0,0,0);
+					if (Pos[i].x == posfinal[array[i] - 1].x and Pos[i].y == posfinal[array[i] - 1].y) {
+						translate.clear();
+						for (int i = 0; i < contador; i++) {
+							translate << token[i];
+						}
+						if (opacidad < 255) {
+							opacidad++;
+						}
+						translate >> respuesta;
+						if (respuesta.length() >= 10) {
+							restador = 75;
+						}
+						else if (respuesta.length() > 13) {
+							restador = 100;
+						}
+						else restador = 0;
+						window.drawText(respuesta.c_str(), 500 - restador+3, 450+3,90, 90, 90, opacidad, 50);
+						window.drawText(respuesta.c_str(), 500 - restador , 450, 230, 230, 230, opacidad, 50);
+
+					}
 				}
 			}
 			else {
+
+				if (opacidadstart < 255)
+				{
+					opacidadstart += 10;
+				}
+				if (opacidadstart > 255) {
+					opacidadstart = 255;
+				}
+				for (int i = 0; i < 4; i++) {
+					SDL_SetTextureAlphaMod(paperTexture[i], opacidadstart);
+				}
+
+				Sleep(40);
+				
 				for (int i = 0; i < contador; i++) {
 					//cout << token[i] << endl;
 
 					Entity paper(Pos[i].x, Pos[i].y, 240, 220, paperTexture[array[i] - 1]);
 					window.render(paper, 1);
-					window.textPeriodico(token[array[i] - 1].c_str(), fontPeriodico[i], Pos[i].x + 40, Pos[i].y + 50, 0, 0, 0, 255, 90);
+					window.textCustom(token[array[i] - 1].c_str(), fontPeriodico[i], Pos[i].x + 40, Pos[i].y + 50, 0, 0, 0, opacidadstart, 90,0,0,0);
 
 				}
 			}
+			
 
+			if (toggleMenu == true) {
+				intmenu = menu(window, mouseX, mouseY, event, clicks);
+
+				if (intmenu == 1) {
+					toggleMenu = false;
+					SDL_Delay(40);
+				}
+				if (intmenu == 2) {
+					window.backgroundColor(0, 0, 0, 255);
+					SDL_DestroyTexture(paperTexture[0]);
+					SDL_DestroyTexture(paperTexture[1]);
+					SDL_DestroyTexture(paperTexture[2]);
+					SDL_DestroyTexture(paperTexture[3]);
+					SDL_DestroyTexture(bordeTexture);
+					SDL_DestroyTexture(titleTexture);
+					SDL_DestroyTexture(blackTexture);
+					return 1;
+
+				}
+			}
 
 
 			window.display();
@@ -209,15 +312,14 @@ int languageGame(RenderWindow window) {
 
 
 	}
-	window.backgroundColor(0, 0, 0);
-	window.render(BGEntity, 1);
+	window.backgroundColor(0, 0, 0, 255);
 	SDL_DestroyTexture(paperTexture[0]);
 	SDL_DestroyTexture(paperTexture[1]);
 	SDL_DestroyTexture(paperTexture[2]);
 	SDL_DestroyTexture(paperTexture[3]);
 	SDL_DestroyTexture(bordeTexture);
 	SDL_DestroyTexture(titleTexture);
-
+	SDL_DestroyTexture(blackTexture);
 	return 0;
 }
 void sorteador(int array[],int cantidad) {

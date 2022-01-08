@@ -15,6 +15,6 @@
 #include "Entity.hpp"
 #include "SDL2SoundEffects.h"
 
-int brickGame(SDL_Texture* brickTexture, SDL_Texture* brickAfter,SDL_Texture* background, RenderWindow gamesWindow);
+int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* brickTexture, SDL_Texture* brickAfter,SDL_Texture* background, RenderWindow gamesWindow);
 void setup(int &brockenBricks , int bricks[10][10]);
 void displayBricks(SDL_Texture* brickTexture, RenderWindow gamesWindow, int bricks[10][10],bool show);

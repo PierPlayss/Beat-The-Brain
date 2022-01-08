@@ -14,8 +14,10 @@
 
 #include "discos.h"
 #include "Memory.h"
+#include "animation.h"
 
-int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
+
+int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window) {
 	int clicks = -1;
 		
 	SDL_Texture* bordeTexture = window.loadTexture("res/gfx/bordeDiscos.png");
@@ -23,6 +25,7 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 	SDL_Texture* disco2Texture = window.loadTexture("res/gfx/disco2.png");
 	SDL_Texture* agujasTexture = window.loadTexture("res/gfx/agujas.png");
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/multitaskingTitle.png");
+	SDL_Texture* blackTexture = window.loadTexture("res/gfx/black.png");
 
 	Entity borde(135, 110, 1030, 530, bordeTexture);
 	Entity agujas(135, 110, 1030, 530, agujasTexture);
@@ -36,6 +39,15 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 	SDL_Event event;
 	stringstream results;
 	string resultados;
+
+	bool toggleMenu = false;
+	int intmenu = 0;
+	int mouseX, mouseY;
+
+	animationIn(window,
+		blackTexture, brainTexture, LogoTexture, BGTexture, titleTexture, bordeTexture, bordeTexture,
+		"Cuantas veces la flecha pasa la aguja?", 490, 38,22,
+		57, 85, 163);
 
 	for (int i = 0; i < 3; i++) {
 		float speed[2] = { 0,0 };
@@ -58,6 +70,7 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 		bool showResults = false;
 		bool over[2] = {0,0};
 		int restador = 0;
+		int opacidad = 0;
 		
 		while (discoGame) {
 
@@ -65,25 +78,48 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 			{
 				if (event.type == SDL_QUIT)
 				{
-					window.backgroundColor(0, 0, 0);
+					window.backgroundColor(0, 0, 0, 255);
 					window.display();
 					return 0;
 				}
 				if (event.button.button == SDL_BUTTON_LEFT) {
 					clicks++;
 					if (clicks == 1) {
-						if (showResults == true) {
-							discoGame = false;
-						}
-						if (stop == true) {
-							showResults = true;
-						}
-						else {
-							time = clock();
-							start = true;
+						if (toggleMenu == false) {
+							if (showResults == true) {
+								discoGame = false;
+							}
+							if (stop == true) {
+								showResults = true;
+							}
+							else {
+								time = clock();
+								start = true;
+							}
 						}
 					}
 					else clicks = 0;
+
+				}
+				if (event.type == SDL_MOUSEMOTION) {
+
+					mouseX = event.motion.x;
+					mouseY = event.motion.y;
+					//cout << mouseX << "," << mouseY << endl;
+
+				}
+				if (event.type == SDL_KEYDOWN) {
+					if ((event.key.keysym.sym == SDLK_RETURN) &&
+						(event.key.keysym.mod & KMOD_ALT))
+					{
+						window.ToggleFullscreen();
+					}
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						if (toggleMenu == false) {
+							toggleMenu = true;
+						}
+						else toggleMenu = false;
+					}
 
 				}
 			}
@@ -147,12 +183,31 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 				//cout << cont[1] << endl;
 			}
 			
-			window.backgroundColor(57,85, 163);
+			window.backgroundColor(57,85, 163, 255);
 			window.render(background, 1);
 			SDL_SetTextureAlphaMod(bordeTexture, 200);
 			window.render(borde, 1);
 			window.render(title, 1);
 			window.drawText("Cuantas veces la flecha pasa la aguja?", 490, 38, 240, 240, 240, 255, 22);
+
+			if (opacidad < 255)
+			{
+				opacidad += 10;
+				Sleep(40);
+
+				SDL_SetTextureAlphaMod(disco1Texture, opacidad);
+				SDL_SetTextureAlphaMod(disco2Texture, opacidad);
+				SDL_SetTextureAlphaMod(agujasTexture, opacidad);
+			}
+			if (opacidad > 255) {
+				opacidad = 255;
+				SDL_SetTextureAlphaMod(disco1Texture, opacidad);
+				SDL_SetTextureAlphaMod(disco2Texture, opacidad);
+				SDL_SetTextureAlphaMod(agujasTexture, opacidad);
+			}
+			
+			
+			
 			window.render(disco1, angulo[0], 1);
 			window.render(disco2, angulo[1], 1);
 			window.render(agujas, 1);
@@ -182,6 +237,26 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 				stop = true;
 			}
 
+			if (toggleMenu == true) {
+				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				if (intmenu == 1) {
+					toggleMenu = false;
+				}
+				if (intmenu == 2) {
+					SDL_DestroyTexture(bordeTexture);
+					SDL_DestroyTexture(disco1Texture);
+					SDL_DestroyTexture(disco2Texture);
+					SDL_DestroyTexture(agujasTexture);
+					SDL_DestroyTexture(titleTexture);
+					SDL_DestroyTexture(blackTexture);
+
+					window.backgroundColor(0, 0, 0, 255);
+					return 1;
+
+				}
+			}
+
+
 			window.display();
 		}
 	
@@ -191,8 +266,9 @@ int discosGame(SDL_Texture* BGTexture, RenderWindow window) {
 	SDL_DestroyTexture(disco2Texture);
 	SDL_DestroyTexture(agujasTexture);
 	SDL_DestroyTexture(titleTexture);
+	SDL_DestroyTexture(blackTexture);
 	
-	window.backgroundColor(0, 0, 0);
+	window.backgroundColor(0, 0, 0, 255);
 	
 	return 0;
 }
