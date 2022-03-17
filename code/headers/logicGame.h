@@ -11,5 +11,5 @@
 #include "Entity.hpp"
 #include "SDL2SoundEffects.h"
 
-int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL_Texture* BGTexture, RenderWindow window);
+int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL_Texture* BGTexture, RenderWindow window, Mix_Music* bgm);
 void setResultados(int &resultado, int angulo, int multiplicador);

@@ -14,5 +14,5 @@
 
 using namespace std;
 
-int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window);
+int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window, Mix_Music* bgm);
 

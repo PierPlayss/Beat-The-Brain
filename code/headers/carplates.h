@@ -15,4 +15,4 @@
 #include "Entity.hpp"
 #include "SDL2SoundEffects.h"
 
-int CarPlates(RenderWindow window, SDL_Texture* BGTexture,SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL2SoundEffects se);
+int CarPlates(RenderWindow window, SDL_Texture* BGTexture,SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL2SoundEffects se, Mix_Music* bgm);
