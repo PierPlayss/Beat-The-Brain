@@ -21,7 +21,7 @@
 
 using namespace std;
 
-int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se) {
+int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGT, RenderWindow window,SDL2SoundEffects se, Mix_Music* bgm) {
 	SDL_Texture* pinkTexture = window.loadTexture("res/gfx/Memory/pink.png");
 	SDL_Texture* redTexture = window.loadTexture("res/gfx/Memory/red.png");
 	SDL_Texture* whiteTexture = window.loadTexture("res/gfx/Memory/white.png");
@@ -34,7 +34,8 @@ int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/MemoryTitle.png");
 	SDL_Texture* blackBGTexture = window.loadTexture("res/gfx/black.png");
 	int completo[8] = { 1,1,1,1,1,1,1,1 };
-	int clicks = -1;
+	int clicks = 0;
+	int clickMenu = 0;
 	int contador = 5;
 	srand(time(NULL));
 	SDL_Event event;
@@ -50,7 +51,7 @@ int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 		161, 113, 16);
 
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		int colores[8];
 		int random = 0;
 		setCero(colores);
@@ -71,22 +72,25 @@ int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 				}
 
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (showAnswers == true) {
-								memory = false;
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (showAnswers == true) {
+									memory = false;
+								}
+								if (stop == true) {
+									showAnswers = true;
+								}
+								else start = true;
 							}
-							if (stop == true) {
-								showAnswers = true;
-							}
-							else start = true;
+							clicks = 0;
 						}
+						
 
 					}
-					else clicks = 0;
-
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -149,7 +153,7 @@ int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 
 
 			if (toggleMenu == true) {
-				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				intmenu = menu(window, mouseX, mouseY, event, clickMenu, bgm);
 
 				if (intmenu == 1) {
 					toggleMenu = false;
@@ -173,11 +177,12 @@ int ColorGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 
 				}
 			}
+			clickMenu = 0;
 
 			window.display();
 		}
 			
-		contador++;
+		if(i<3)contador++;
 	}
 	window.backgroundColor(0, 0, 0, 255);
 	window.display();
@@ -270,8 +275,8 @@ void displayColors(int array[],
 }
 void displayAnswers(int array[10][1],int contador,RenderWindow window) {
 	int x = 550;
-	int y = 150;
-	int sumadordey = 65;
+	int y = 125;
+	int sumadordey = 64;
 	for (int i = 0; i < contador; i++) {
 		if (array[i][0] == 0) {
 			window.drawText("PINK", x+3, y+3 + (sumadordey * i), 70, 70, 70, 160, 50);

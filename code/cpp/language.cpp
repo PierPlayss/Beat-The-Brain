@@ -22,7 +22,7 @@
 
 using namespace std;
 
-int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWindow window) {
+int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWindow window,Mix_Music* bgm) {
 	
 	SDL_Texture* paperTexture[4] = {
 		window.loadTexture("res/gfx/language/paper1.png"),
@@ -52,7 +52,8 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 
 	clock_t time;
 	time = clock();
-	int clicks = -1;
+	int clicks = 0;
+	int clickMenu = 0;
 	int array[4] = { 0,1,2,3 };
 	int array2[4] = { 0,1,2,3 };
 	string s[100];
@@ -70,7 +71,7 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 
 	//std::cout << s << std::endl;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		int restador = 0;
 		int opacidad = 0;
 		int opacidadstart = 0;
@@ -116,7 +117,7 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 			sorteador(array, contador);
 
 			posfinal[0].x = 185;
-			posfinal[0].y = 228;
+			posfinal[0].y = 230;
 			posfinal[1].x = 420;
 			posfinal[1].y = 225;
 			posfinal[2].x = 680;
@@ -169,20 +170,26 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 				if (event.type == SDL_QUIT)
 					language = false;
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (showResult == true) {
-								language = false;
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (showResult == true) {
+									language = false;
+								
+								}
+								else {
+									showResult = true;
+									opacidadstart = 255;
+								
+								}
 							}
-							showResult = true;
-							opacidadstart = 255;
+							clicks = 0;
 						}
-					
+						
 					}
-					else clicks = 0;
-
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -217,16 +224,16 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 				}
 				for (int i = 0; i < contador; i++) {
 					if (Pos[i].x < posfinal[array[i] - 1].x) {
-						Pos[i].x++;
+						Pos[i].x+=5;
 					}
 					if (Pos[i].x > posfinal[array[i] - 1].x) {
-						Pos[i].x--;
+						Pos[i].x-=5;
 					}
 					if (Pos[i].y < posfinal[array[i] - 1].y) {
-						Pos[i].y++;
+						Pos[i].y+=5;
 					}
 					if (Pos[i].y > posfinal[array[i] - 1].y) {
-						Pos[i].y--;
+						Pos[i].y-=5;
 					}
 					//cout << array[i] - 1 << endl;
 					//cout << token[array[i] - 1] << endl;
@@ -286,7 +293,7 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 			
 
 			if (toggleMenu == true) {
-				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				intmenu = menu(window, mouseX, mouseY, event, clickMenu, bgm);
 
 				if (intmenu == 1) {
 					toggleMenu = false;
@@ -305,7 +312,7 @@ int languageGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, RenderWind
 
 				}
 			}
-
+			clickMenu = 0;
 
 			window.display();
 		}
@@ -344,7 +351,7 @@ void sorteador(int array[],int cantidad) {
 }
 void Usado(int usado[], int& random, int lineas) {
 	random = rand() % lineas;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		if (random == usado[i]) {
 			Usado(usado, random, lineas);
 		}

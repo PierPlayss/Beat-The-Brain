@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 	}
 	int mouseX, mouseY;
 	int clicks = 0;
-	
+	int clickMenu = 0;
 	
 	//Sounds
 	SDL2SoundEffects se;
@@ -61,6 +61,8 @@ int main(int argc, char* argv[]) {
 	se.addSoundEffect("res/sound/memory/yellow.mp3");//6
 	se.addSoundEffect("res/sound/memory/purple.mp3");//7
 	se.addSoundEffect("res/sound/observation/car.mp3");//8
+
+	Mix_Music* bgm = Mix_LoadMUS("res/sound/music.mp3");
 	//se.addSoundEffect("res/sound/strike.mp3"); //0
 
 	SDL_Texture* brickTexture =window.loadTexture("res/gfx/brick.png");
@@ -76,6 +78,7 @@ int main(int argc, char* argv[]) {
 	SDL_Texture* LogoTexture = window.loadTexture("res/gfx/logo.png");
 
 	
+
 	Entity LogicE(0, 50,1280, 720, brainLogic);
 	Entity MemoryE(0, 50, 1280, 720, brainMemory);
 	Entity ObservationE(0, 50, 1280, 720, brainObservation);
@@ -116,19 +119,27 @@ int main(int argc, char* argv[]) {
 				//cout << mouseX << "," << mouseY << endl;
 				
 			}
-			if (event.button.button == SDL_BUTTON_LEFT) {
-				SDL_Delay(20);
-				clicks++;
-				if (clicks == 1) {
-					if (toggleMenu == false) {
-						if (start == true) {
-							stop = true;
+			if (event.type == SDL_MOUSEBUTTONUP) {
+				if (event.button.state == SDL_RELEASED) {
+					
+					SDL_Delay(20);
+					clicks++;
+					clickMenu++;
+					if (clicks == 1) {
+						if (toggleMenu == false) {
+							if (start == false) {
+								start = true;
+							}
+							else {
+								stop = true;
+							}
 						}
-						else start = true;
+						clicks = 0;
 					}
+					
 				}
-				else clicks = 0;
 			}
+			
 			if (event.type == SDL_KEYDOWN) {
 				if ((event.key.keysym.sym == SDLK_RETURN) &&
 					(event.key.keysym.mod & KMOD_ALT))
@@ -247,34 +258,36 @@ int main(int argc, char* argv[]) {
 			Sleep(600);
 			//cout << contador << endl;
 			if (contador == 0) {
-				if (logicGame(brainLogic, LogoTexture, BGTexture, window) == 0) {
+				if (logicGame(brainLogic, LogoTexture, BGTexture, window,bgm) == 0) {
 					played[contador] = true;
 				}
 			}
 			if (contador == 1) {
-				if (ColorGame(brainMemory, LogoTexture, BGTexture, window, se) == 0) {
+				Mix_PauseMusic();
+				if (ColorGame(brainMemory, LogoTexture, BGTexture, window, se, bgm) == 0) {
 					played[contador] = true;
 				}
+				Mix_ResumeMusic();
 			}
 			if (contador == 2) {
-				if (relojesGame(brainOrientation, LogoTexture, BGTexture, window) == 1) {
+				if (relojesGame(brainOrientation, LogoTexture, BGTexture, window, bgm) == 0) {
 					played[contador] = true;
 				}				
 			}
 			if (contador == 3) {
-				CarPlates(window, BGTexture, brainObservation, LogoTexture, se);
-				if (brickGame(brainObservation, LogoTexture, brickTexture, brickAfterTexture, BGTexture, window) == 0) {
+				CarPlates(window, BGTexture, brainObservation, LogoTexture, se, bgm);
+				if (brickGame(brainObservation, LogoTexture, brickTexture, brickAfterTexture, BGTexture, window, bgm) == 0) {
 					played[contador] = true;
 				}
 			
 			}
 			if (contador == 4) {
-				if (languageGame(brainLanguage, LogoTexture, window) == 0) {
+				if (languageGame(brainLanguage, LogoTexture, window, bgm) == 0) {
 					played[4] = true;
 				}				
 			}
 			if (contador == 5) {
-				if (discosGame(brainMT, LogoTexture, BGTexture, window) == 0) {
+				if (discosGame(brainMT, LogoTexture, BGTexture, window, bgm) == 0) {
 					played[5] = true;
 				}				
 			}
@@ -287,7 +300,7 @@ int main(int argc, char* argv[]) {
 		
 		
 		if (toggleMenu == true) {
-			intmenu = menu(window, mouseX, mouseY, event, clicks);
+			intmenu = menu(window, mouseX, mouseY, event, clickMenu,bgm);
 				if (intmenu == 1) {
 					toggleMenu = false;
 				}
@@ -295,8 +308,9 @@ int main(int argc, char* argv[]) {
 					gameRunning = false;
 					
 				}
+				
 		}
-
+		clickMenu = 0;
 
 		window.display();
 

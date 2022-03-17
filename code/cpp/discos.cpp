@@ -17,8 +17,9 @@
 #include "animation.h"
 
 
-int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window) {
-	int clicks = -1;
+int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window, Mix_Music* bgm) {
+	int clicks = 0;
+	int clickMenu = 0;
 		
 	SDL_Texture* bordeTexture = window.loadTexture("res/gfx/bordeDiscos.png");
 	SDL_Texture* disco1Texture = window.loadTexture("res/gfx/disco.png");
@@ -49,7 +50,7 @@ int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture*
 		"Cuantas veces la flecha pasa la aguja?", 490, 38,22,
 		57, 85, 163);
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		float speed[2] = { 0,0 };
 		float angulo[2] = { 0,360 };
 		int cont[2] = { 0,0 };
@@ -82,24 +83,27 @@ int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture*
 					window.display();
 					return 0;
 				}
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (showResults == true) {
-								discoGame = false;
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (showResults == true) {
+									discoGame = false;
+								}
+								if (stop == true) {
+									showResults = true;
+								}
+								else {
+									time = clock();
+									start = true;
+								}
 							}
-							if (stop == true) {
-								showResults = true;
-							}
-							else {
-								time = clock();
-								start = true;
-							}
+							clicks = 0;
 						}
-					}
-					else clicks = 0;
 
+					}
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -238,7 +242,7 @@ int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture*
 			}
 
 			if (toggleMenu == true) {
-				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				intmenu = menu(window, mouseX, mouseY, event, clickMenu, bgm);
 				if (intmenu == 1) {
 					toggleMenu = false;
 				}
@@ -255,7 +259,7 @@ int discosGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture*
 
 				}
 			}
-
+			clickMenu = 0;
 
 			window.display();
 		}

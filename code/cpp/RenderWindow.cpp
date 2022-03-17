@@ -52,7 +52,7 @@ void RenderWindow::drawText(const char* msg, int x, int y, int r, int g, int b, 
 	color.b = b;
 	color.a = 255;
 	SDL_Rect rect;
-	surf = TTF_RenderText_Solid(font, msg, color);
+	surf = TTF_RenderText_Blended(font, msg, color);
 	texture = SDL_CreateTextureFromSurface(renderer, surf);
 	SDL_SetTextureAlphaMod(texture, a);
 	rect.x = x;
@@ -84,7 +84,7 @@ void RenderWindow::textCustom(const char* msg, std::string path, int x, int y, i
 	color.b = b;
 	color.a = 255;
 	SDL_Rect rect;
-	surf = TTF_RenderText_Solid(font, msg, color);
+	surf = TTF_RenderText_Blended(font, msg, color);
 	texture = SDL_CreateTextureFromSurface(renderer, surf);
 	SDL_SetTextureAlphaMod(texture, a);
 

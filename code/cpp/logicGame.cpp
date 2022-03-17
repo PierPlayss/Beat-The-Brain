@@ -15,7 +15,7 @@
 
 using namespace std;
 
-int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window) {
+int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* BGTexture, RenderWindow window,Mix_Music* bgm) {
 
 	SDL_Texture* boardTexture = window.loadTexture("res/gfx/boardlogic.png");
 	SDL_Texture* titleTexture = window.loadTexture("res/gfx/LogicTitle.png");
@@ -41,14 +41,15 @@ int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 		88, 18, 29);
 
 	SDL_Event event;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		int angulo[3];
 		int resultado[3] = { 0,0,0 };
 		int resultadoaux = 0;
 		int random;
 		int aux = 0;
 		bool logic = true;
-		int clicks = -1;
+		int clicks = 0;
+		int clickMenu = 0;
 		int subtotal = 0;
 		srand(time(NULL));
 		bool start = false;
@@ -88,22 +89,27 @@ int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 					window.display();
 					return 0;
 				}
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (showResults == true) {
-								logic = false;
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (showResults == true) {
+									logic = false;
+								}
+								if (start == true) {
+									showResults = true;
+								}
+								else {
+									start = true;
+								}
 							}
-							if (start == true) {
-								showResults = true;
-							}
-							start = true;
+							clicks = 0;
 						}
-						
-					}
-					else clicks = 0;
+					
 
+					}
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -156,7 +162,7 @@ int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 			}
 
 			if (toggleMenu == true) {
-				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				intmenu = menu(window, mouseX, mouseY, event, clickMenu, bgm);
 
 				if (intmenu == 1) {
 					toggleMenu = false;
@@ -174,6 +180,7 @@ int logicGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 
 				}
 			}
+			clickMenu = 0;
 
 			window.display();
 		}
@@ -216,7 +223,7 @@ void setResultados(int &resultado, int angulo, int multiplicador) {
 		resultado = 15 * multiplicador;
 	}
 	if (angulo ==144) {
-		resultado = 12 * multiplicador;
+		resultado = 2 * multiplicador;
 	}
 	if (angulo == 162) {
 		resultado = 17 * multiplicador;

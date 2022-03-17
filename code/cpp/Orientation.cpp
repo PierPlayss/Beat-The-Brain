@@ -18,7 +18,7 @@
 #include "animation.h"
 using namespace std;
 
-int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* background,RenderWindow window) {
+int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* background,RenderWindow window, Mix_Music* bgm) {
 	SDL_Texture* relojTexture = window.loadTexture("res/gfx/Orientation/watch.png");
 	SDL_Texture* bordeTexture = window.loadTexture("res/gfx/bordeReloj.png");
 	SDL_Texture* aguja2Texture = window.loadTexture("res/gfx/Orientation/arrow.png");
@@ -49,11 +49,12 @@ int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture
 	int aux2 = 0;
 	SDL_Event event;
 	srand(time(NULL));
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		int horaAngulo = 0, minAngulo = 0;
 		bool orientation = true;
 		bool canShow = false;
-		int clicks = -1;
+		int clicks = 0;
+		int clickMenu = 0;
 		horaAngulo = rand() % 360;
 		aux2 = horaAngulo / 30;
 		horaAngulo = aux2 * 30;
@@ -120,27 +121,30 @@ int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture
 				}
 					
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (canShow == true) {
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (canShow == true) {
 
-								orientation = false;
+									orientation = false;
 
+								}
+								if (canShow == false) {
+									opacidad = 255;
+									SDL_SetTextureAlphaMod(relojTexture, opacidad);
+									SDL_SetTextureAlphaMod(aguja1Texture, opacidad);
+									SDL_SetTextureAlphaMod(aguja2Texture, opacidad);
+									canShow = true;
+								}
 							}
-							if (canShow == false) {
-								opacidad = 255;
-								SDL_SetTextureAlphaMod(relojTexture, opacidad);
-								SDL_SetTextureAlphaMod(aguja1Texture, opacidad);
-								SDL_SetTextureAlphaMod(aguja2Texture, opacidad);
-								canShow = true;
-							}
+							clicks = 0;
 						}
 						
-					}
-					else clicks = 0;
 
+					}
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -214,7 +218,7 @@ int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture
 
 
 			if (toggleMenu == true) {
-				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				intmenu = menu(window, mouseX, mouseY, event, clickMenu, bgm);
 
 				if (intmenu == 1) {
 					toggleMenu = false;
@@ -231,6 +235,7 @@ int relojesGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture
 
 				}
 			}
+			clickMenu = 0;
 
 			window.display();
 

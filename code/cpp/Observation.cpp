@@ -20,7 +20,7 @@ using namespace std;
 
 
 
-int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* background,RenderWindow gamesWindow) {
+int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* brickTexture, SDL_Texture* brickAfter, SDL_Texture* background,RenderWindow gamesWindow, Mix_Music* bgm) {
 	SDL_Texture* bordeTexture = gamesWindow.loadTexture("res/gfx/borde.png");
 	SDL_Texture* obTitleTexture = gamesWindow.loadTexture("res/gfx/ObservationTitle.png");
 	Entity titleE(0, 0, 1280, 107, obTitleTexture);
@@ -29,7 +29,8 @@ int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 	bool showBroken = false;
 	bool observation = true;
 	bool showTotal = false;
-	int clicks = -1;
+	int clicks = 0;
+	int clickMenu = 0;
 	stringstream tb;
 	string brickString;
 	int opacidad = 1;
@@ -56,27 +57,30 @@ int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 				if (event.type == SDL_QUIT)
 					observation = false;
 
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (showTotal == true) {
-								observation = false;
-								gamesWindow.backgroundColor(0, 0, 0, 255);
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (showTotal == true) {
+									observation = false;
+									gamesWindow.backgroundColor(0, 0, 0, 255);
+								}
+								if (showBroken == true) {
+									showTotal = true;
+								}
+								else {
+									opacidad = 255;
+									SDL_SetTextureAlphaMod(brickTexture, opacidad);
+									showBroken = true;
+								}
 							}
-							if (showBroken == true) {
-								showTotal = true;
-							}
-							else {
-								opacidad = 255;
-								SDL_SetTextureAlphaMod(brickTexture, opacidad);
-								showBroken = true;
-							}
+							clicks = 0;
 						}
 					
-					}
-					else clicks = 0;
 
+					}
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -141,7 +145,7 @@ int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 			gamesWindow.render(borde, 1);
 
 			if (toggleMenu == true) {
-				intmenu = menu(gamesWindow, mouseX, mouseY, event, clicks);
+				intmenu = menu(gamesWindow, mouseX, mouseY, event, clickMenu, bgm);
 
 				if (intmenu == 1) {
 					toggleMenu = false;
@@ -156,7 +160,7 @@ int brickGame(SDL_Texture* brainTexture, SDL_Texture* LogoTexture, SDL_Texture* 
 
 				}
 			}
-
+			clickMenu = 0;
 
 			gamesWindow.display();
 		}

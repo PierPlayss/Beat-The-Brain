@@ -18,7 +18,7 @@
 
 using namespace std;
 
-int CarPlates(RenderWindow window, SDL_Texture* BGTexture, SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL2SoundEffects se) {
+int CarPlates(RenderWindow window, SDL_Texture* BGTexture, SDL_Texture* brainTexture, SDL_Texture* LogoTexture,SDL2SoundEffects se, Mix_Music* bgm) {
 	SDL_Texture* plateTexture = window.loadTexture("res/gfx/plate.png");
 	SDL_Texture* plateSelectedTexture = window.loadTexture("res/gfx/plateSelected.png");
 	SDL_Texture* carTexture = window.loadTexture("res/gfx/car.png");
@@ -31,7 +31,8 @@ int CarPlates(RenderWindow window, SDL_Texture* BGTexture, SDL_Texture* brainTex
 
 	Entity car(0, 0, 900, 500, carTexture);
 	Entity plate(0, 0, 900, 500, plateTexture);
-	int clicks = -1;
+	int clicks = 0;
+	int clickMenu = 0;
 	stringstream tr;
 	string aux;
 	std::string matriculas[4][6] = {{"C G 3 2   J X U","D G 8 2   J X U","C G 8 2   J X U","L G 8 2   J X U","C G 8 2   J D U","C G 8 2  J X B"},
@@ -93,25 +94,29 @@ int CarPlates(RenderWindow window, SDL_Texture* BGTexture, SDL_Texture* brainTex
 					return 0;
 				}
 			
-				if (event.button.button == SDL_BUTTON_LEFT) {
-					SDL_Delay(20);
-					clicks++;
-					if (clicks == 1) {
-						if (toggleMenu == false) {
-							if (show == true) {
-
-								carplates = false;
-
-
+				if (event.type == SDL_MOUSEBUTTONUP) {
+					if (event.button.state == SDL_RELEASED) {
+						SDL_Delay(20);
+						clicks++;
+						clickMenu++;
+						if (clicks == 1) {
+							if (toggleMenu == false) {
+								if (show == true) {
+									carplates = false;
+								}
+								if (stop == true) {
+									show = true;
+								}
+								else {
+									start = true;
+								}
+								
 							}
-							if (stop == true) {
-								show = true;
-							}
-							start = true;
+							clicks = 0;
 						}
-					}
-					else clicks = 0;
+	
 
+					}
 				}
 				if (event.type == SDL_MOUSEMOTION) {
 
@@ -210,7 +215,7 @@ int CarPlates(RenderWindow window, SDL_Texture* BGTexture, SDL_Texture* brainTex
 			
 
 			if (toggleMenu == true) {
-				intmenu = menu(window, mouseX, mouseY, event, clicks);
+				intmenu = menu(window, mouseX, mouseY, event, clickMenu, bgm);
 		
 				if (intmenu == 1) {
 					toggleMenu = false;
@@ -230,7 +235,7 @@ int CarPlates(RenderWindow window, SDL_Texture* BGTexture, SDL_Texture* brainTex
 				}
 			
 			}
-
+			clickMenu = 0;
 			
 		
 			window.display();
